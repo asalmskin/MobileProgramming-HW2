@@ -1,7 +1,6 @@
 import Foundation
 import FoundationNetworking
 
-
 struct GameResponse: Codable {
     let gameID: String
 
@@ -12,7 +11,7 @@ struct GameResponse: Codable {
 
 struct GuessRequest: Codable {
     let game_id: String
-    let guess: String   
+    let guess: String
 }
 
 struct GuessResponse: Codable {
@@ -31,8 +30,6 @@ func startGameAPI() -> String? {
 
     let semaphore = DispatchSemaphore(value: 0)
     var gameID: String?
-    var responseData: Data?
-    var statusCode: Int?
 
     let task = URLSession.shared.dataTask(with: request) { data, response, error in
         defer { semaphore.signal() }
@@ -42,19 +39,9 @@ func startGameAPI() -> String? {
             return
         }
 
-        if let http = response as? HTTPURLResponse {
-            statusCode = http.statusCode
-            print("Received status code:", statusCode!)
-        }
-
-        responseData = data
-
         if let data = data {
-            print("Received data:", String(data: data, encoding: .utf8) ?? "<non utf8 data>")
             if let responseObj = try? JSONDecoder().decode(GameResponse.self, from: data) {
                 gameID = responseObj.gameID
-            } else {
-                print("Failed to decode GameResponse from data")
             }
         }
     }
@@ -63,7 +50,6 @@ func startGameAPI() -> String? {
     semaphore.wait()
     return gameID
 }
-
 
 func makeGuessAPI(gameID: String, guess: [Int]) -> (black: Int, white: Int)? {
     guard let url = URL(string: "https://mastermind.darkube.app/guess") else { return nil }
@@ -87,16 +73,9 @@ func makeGuessAPI(gameID: String, guess: [Int]) -> (black: Int, white: Int)? {
             return
         }
 
-        if let http = response as? HTTPURLResponse {
-            print("Guess status code:", http.statusCode)
-        }
-
         if let data = data {
-            print("Guess response raw:", String(data: data, encoding: .utf8) ?? "<non utf8 data>")
             if let decoded = try? JSONDecoder().decode(GuessResponse.self, from: data) {
                 result = decoded
-            } else {
-                print("Failed to decode GuessResponse from data")
             }
         }
     }
@@ -105,8 +84,6 @@ func makeGuessAPI(gameID: String, guess: [Int]) -> (black: Int, white: Int)? {
     semaphore.wait()
     return result.map { ($0.black, $0.white) }
 }
-
-
 
 func play() {
     print("Welcome to Mastermind!")
@@ -124,7 +101,7 @@ func play() {
             print("Invalid input. Try again.")
             continue
         }
-        
+
         if input.lowercased() == "exit" {
             print("Goodbye!")
             break
@@ -149,7 +126,6 @@ func play() {
             break
         }
     }
-
 }
 
 play()
