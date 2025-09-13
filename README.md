@@ -16,3 +16,8 @@ Ensure Swift is installed, then run:
 
 ```bash
 swift main.swift
+
+If you want to use with api version, run:
+
+```bash
+swift main_with_API.swift
